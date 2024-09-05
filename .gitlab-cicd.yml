@@ -1,0 +1,33 @@
+image: docker:latest
+
+services:
+  - docker:dind
+
+stages:
+  - build
+  - test
+  - deploy
+
+variables:
+  DOCKER_DRIVER: overlay2
+  IMAGE_NAME: <SEU_USUARIO_DOCKER_HUB>/previsao_acoes
+
+before_script:
+  - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+
+build:
+  stage: build
+  script:
+    - docker build -t $IMAGE_NAME .
+
+test:
+  stage: test
+  script:
+    - docker run --rm $IMAGE_NAME pytest tests/
+
+deploy:
+  stage: deploy
+  script:
+    - docker push $IMAGE_NAME
+  only:
+    - main
